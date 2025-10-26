@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using AOT;
 
 namespace ManagedBass
 {
@@ -29,7 +30,7 @@ namespace ManagedBass
             var key = Tuple.Create(Handle, SpecificHandle);
 
             var contains = Procedures.ContainsKey(key);
-            
+
             if (Freeproc != null && Procedures.All(pair => pair.Key.Item1 != Handle))
                 Bass.ChannelSetSync(Handle, SyncFlags.Free, 0, Freeproc);
 
@@ -50,11 +51,12 @@ namespace ManagedBass
             Procedures.TryRemove(key, out object unused);
         }
 
+        [MonoPInvokeCallback(typeof(SyncProcedure))]
         static void Callback(int Handle, int Channel, int Data, IntPtr User)
         {
             // ToArray is necessary because the object iterated on should not be modified.
             var toRemove = Procedures.Where(Pair => Pair.Key.Item1 == Channel).Select(Pair => Pair.Key).ToArray();
-            
+
             foreach (var key in toRemove)
                 Procedures.TryRemove(key, out object unused);
         }

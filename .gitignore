@@ -35,3 +35,6 @@ src/.idea/
 # Xml Documentation files
 ManagedBass.xml
 ManagedBass.*.xml
+
+# Unity
+*.meta
