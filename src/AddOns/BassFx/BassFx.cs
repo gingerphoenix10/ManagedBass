@@ -8,8 +8,11 @@ namespace ManagedBass.Fx
     /// </summary>
     public static class BassFx
     {
+#if __IOS__
+        const string DllName = "__Internal";
+#else
         const string DllName = "bass_fx";
-        
+#endif
         #region Version
         [DllImport(DllName)]
         static extern int BASS_FX_GetVersion();
@@ -34,7 +37,7 @@ namespace ManagedBass.Fx
         /// <exception cref="Errors.SampleFormat">The <paramref name="Channel" />'s format is not supported. Make sure the channel is either Stereo or Mono.</exception>
         [DllImport(DllName, EntryPoint = "BASS_FX_TempoCreate")]
         public static extern int TempoCreate(int Channel, BassFlags Flags);
-        
+
         /// <summary>
         /// Get the source channel handle of the reversed stream.
         /// </summary>
@@ -43,7 +46,7 @@ namespace ManagedBass.Fx
         /// <exception cref="Errors.Handle"><paramref name="Channel" /> is not valid.</exception>
         [DllImport(DllName, EntryPoint = "BASS_FX_TempoGetSource")]
         public static extern int TempoGetSource(int Channel);
-        
+
         /// <summary>
         /// Get the ratio of the resulting rate and source rate (the resampling ratio).
         /// </summary>
@@ -74,7 +77,7 @@ namespace ManagedBass.Fx
         /// <exception cref="Errors.SampleFormat">The <paramref name="Channel" />'s format is not supported. Make sure the channel is either Stereo or Mono.</exception>
         [DllImport(DllName, EntryPoint = "BASS_FX_ReverseCreate")]
         public static extern int ReverseCreate(int Channel, float DecodingBlockLength, BassFlags Flags);
-        
+
         /// <summary>
         /// Get the source channel handle of the reversed stream.
         /// </summary>
@@ -98,7 +101,7 @@ namespace ManagedBass.Fx
         /// <returns>If successful, the original BPM value is returned, else -1 is returned. Use <see cref="Bass.LastError" /> to get the error code.</returns>
         /// <remarks>
         /// <para>
-        /// The BPM detection algorithm works by detecting repeating low-frequency (less than 250Hz) sound patterns and thus works mostly with most rock/pop music with bass or drum beat. 
+        /// The BPM detection algorithm works by detecting repeating low-frequency (less than 250Hz) sound patterns and thus works mostly with most rock/pop music with bass or drum beat.
         /// The BPM detection doesn't work on pieces such as classical music without distinct, repeating bass frequency patterns.
         /// Also pieces with varying tempo, varying bass patterns or very complex bass patterns (jazz, hiphop) may produce odd BPM readings.
         /// </para>
@@ -153,7 +156,7 @@ namespace ManagedBass.Fx
         /// <exception cref="Errors.Handle"><paramref name="Handle" /> is not valid.</exception>
         [DllImport(DllName, EntryPoint = "BASS_FX_BPM_CallbackReset")]
         public static extern bool BPMCallbackReset(int Handle);
-        
+
         /// <summary>
         /// Frees all resources used by a given handle.
         /// </summary>
@@ -201,7 +204,7 @@ namespace ManagedBass.Fx
         /// <exception cref="Errors.Handle"><paramref name="Handle" /> is not valid.</exception>
         [DllImport(DllName, EntryPoint="BASS_FX_BPM_BeatCallbackSet")]
         public static extern bool BPMBeatCallbackSet(int Handle, BPMBeatProcedure Procedure, IntPtr User = default(IntPtr));
-        
+
         /// <summary>
         /// Reset the BPM buffers.
         /// </summary>
@@ -228,7 +231,7 @@ namespace ManagedBass.Fx
         /// A band-pass filter is a device that passes frequencies within a certain range and rejects (attenuates) frequencies outside that range.
         /// So the <paramref name="Bandwidth" /> parameter defines the range around a center-frequency to include in the beat detection algo.
         /// The <paramref name="CenterFreq" /> parameter actually defines the center-frequency of the band pass filter.
-        /// Once a beat is detected, the <paramref name="Beat_rTime" /> parameter defines the time in ms. in which no other beat will be detected after that just detected beat. 
+        /// Once a beat is detected, the <paramref name="Beat_rTime" /> parameter defines the time in ms. in which no other beat will be detected after that just detected beat.
         /// The background is, that often you have kind-of 'double beats' in a drum set.
         /// So the <paramref name="Beat_rTime" /> should avoid, that a second (quickly repeated beat) beat is detected.
         /// </remarks>
@@ -249,14 +252,14 @@ namespace ManagedBass.Fx
         /// A band-pass filter is a device that passes frequencies within a certain range and rejects (attenuates) frequencies outside that range.
         /// So the <paramref name="Bandwidth" /> parameter defines the range around a center-frequency to include in the beat detection algo.
         /// The <paramref name="CenterFreq" /> parameter actually defines the center-frequency of the band pass filter.
-        /// Once a beat is detected, the <paramref name="Beat_rTime" /> parameter defines the time in ms. in which no other beat will be detected after that just detected beat. 
+        /// Once a beat is detected, the <paramref name="Beat_rTime" /> parameter defines the time in ms. in which no other beat will be detected after that just detected beat.
         /// The background is, that often you have kind-of 'double beats' in a drum set.
         /// So the <paramref name="Beat_rTime" /> should avoid, that a second (quickly repeated beat) beat is detected.
         /// </remarks>
         /// <exception cref="Errors.Handle"><paramref name="Handle" /> is not valid.</exception>
         [DllImport(DllName, EntryPoint="BASS_FX_BPM_BeatGetParameters")]
         public static extern bool BPMBeatGetParameters(int Handle, out float Bandwidth, out float CenterFreq, out float Beat_rTime);
-        
+
         /// <summary>
         /// Free all resources used by a given handle (decode or callback beat).
         /// </summary>

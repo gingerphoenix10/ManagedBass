@@ -5,14 +5,17 @@ namespace ManagedBass.Opus
 {
     /// <summary>
     /// BassOpus is a BASS addon enabling the playing of Opus (Opus Interactive Audio Codec) encoded files.
-    /// </summary> 
+    /// </summary>
     /// <remarks>
     /// Supports .opus
     /// </remarks>
     public static class BassOpus
     {
+#if __IOS__
+        const string DllName = "__Internal";
+#else
         const string DllName = "bassopus";
-        		
+#endif
         [DllImport(DllName, CharSet = CharSet.Unicode)]
         static extern int BASS_OPUS_StreamCreateFile(bool mem, string file, long offset, long length, BassFlags flags);
 

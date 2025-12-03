@@ -8,8 +8,11 @@ namespace ManagedBass.Mix
     /// </summary>
     public static class BassMix
     {
+#if __IOS__
+        const string DllName = "__Internal";
+#else
         const string DllName = "bassmix";
-        
+#endif
         #region Version
         [DllImport(DllName)]
         static extern int BASS_Mixer_GetVersion();
@@ -38,7 +41,7 @@ namespace ManagedBass.Mix
         /// <para>
         /// All splitter streams with the same source share a buffer to access its sample data.
         /// The length of the buffer is determined by the <see cref="SplitBufferLength"/> config option;
-        /// the splitter streams should not be allowed to drift apart beyond that, otherwise those left behind will suffer buffer overflows. 
+        /// the splitter streams should not be allowed to drift apart beyond that, otherwise those left behind will suffer buffer overflows.
         /// A splitter stream's buffer state can be reset via <see cref="SplitStreamReset(int)" />;
         /// that can also be used to reset a splitter stream that has ended, so that it can be played again.
         /// </para>
@@ -47,9 +50,9 @@ namespace ManagedBass.Mix
         /// The <see cref="BassFlags.SplitSlave"/> flag can be toggled at any time via <see cref="Bass.ChannelFlags" />.
         /// </para>
         /// <para>
-        /// When <see cref="Bass.ChannelSetPosition" /> is used on a splitter stream, its source will be set to the requested position and the splitter stream's buffer state will be reset so that it immediately receives data from the new position. 
+        /// When <see cref="Bass.ChannelSetPosition" /> is used on a splitter stream, its source will be set to the requested position and the splitter stream's buffer state will be reset so that it immediately receives data from the new position.
         /// The position change will affect all of the source's splitter streams, but the others will not have their buffer state reset;
-        /// they will continue to receive any buffered data before reaching the data from the new position. 
+        /// they will continue to receive any buffered data before reaching the data from the new position.
         /// <see cref="SplitStreamReset(int)" /> can be used to reset the buffer state.
         /// </para>
         /// <para>
@@ -96,7 +99,7 @@ namespace ManagedBass.Mix
         /// <param name="Handle">The splitter (as obtained by <see cref="CreateSplitStream" />) or the source channel handle.</param>
         /// <returns>If successful, <see langword="true" /> is returned, else <see langword="false" /> is returned. Use <see cref="Bass.LastError" /> to get the error code.</returns>
         /// <remarks>
-        /// This function resets the splitter stream's buffer state, so that the next sample data it receives will be from the source's current position. 
+        /// This function resets the splitter stream's buffer state, so that the next sample data it receives will be from the source's current position.
         /// If the stream has ended, that is reset too, so that it can be played again.
         /// Unless called from within a mixtime sync callback, the stream's output buffer (if it has one) is also flushed.
         /// </remarks>
@@ -179,13 +182,13 @@ namespace ManagedBass.Mix
         /// </para>
         /// <para>
         /// Unless the <see cref="BassFlags.MixerEnd"/> flag is specified, a mixer stream will never end.
-        /// When there are no sources (or the sources have ended/stalled), it'll produce no output until there's an active source. 
+        /// When there are no sources (or the sources have ended/stalled), it'll produce no output until there's an active source.
         /// That's unless the <see cref="BassFlags.MixerNonStop"/> flag is used, in which case it will produce silent output while there are no active sources.
         /// The <see cref="BassFlags.MixerEnd"/> and <see cref="BassFlags.MixerNonStop"/> flags can be toggled at any time, using <see cref="Bass.ChannelFlags" />.
         /// </para>
         /// <para>
         /// Besides mixing channels, a mixer stream can be used as a resampler.
-        /// In that case the freq parameter would be set the new sample rate, and the source channel's attributes would be left at their defaults. 
+        /// In that case the freq parameter would be set the new sample rate, and the source channel's attributes would be left at their defaults.
         /// A mixer stream can also be used to downmix, upmix and generally rearrange channels, set using the <see cref="ChannelSetMatrix(int,float[,])"/>.
         /// </para>
         /// </remarks>
@@ -261,7 +264,7 @@ namespace ManagedBass.Mix
         /// This function is identical to <see cref="MixerAddChannel(int,int,BassFlags)" />, but with the additional ability to specify a delay and duration for the channel.
         /// <para>
         /// The <paramref name="Start" /> and <paramref name="Length" /> parameters relate to the mixer output.
-        /// So when calculating these values, use the mixer stream's sample format rather than the source channel's. 
+        /// So when calculating these values, use the mixer stream's sample format rather than the source channel's.
         /// The start parameter is automatically rounded-down to the nearest sample boundary, while the length parameter is rounded-up to the nearest sample boundary.
         /// </para>
         /// </remarks>
@@ -328,7 +331,7 @@ namespace ManagedBass.Mix
         }
 
         /// <summary>
-        /// The source channel Buffer size multiplier... 1 (min) to 5 (max). 
+        /// The source channel Buffer size multiplier... 1 (min) to 5 (max).
         /// </summary>
         /// <remarks>
         /// If the value specified is outside this range, it is automatically capped.
@@ -337,13 +340,13 @@ namespace ManagedBass.Mix
         /// To reach the source channel's Buffer size, the multiplier (multiple) is applied to the <see cref="Bass.PlaybackBufferLength"/>
         /// setting at the time of the mixer's creation.
         /// If the source is played at it's default rate, then the Buffer only need to be as big as the mixer's Buffer.
-        /// But if it's played at a faster rate, then the Buffer needs to be bigger for it to contain the data that 
+        /// But if it's played at a faster rate, then the Buffer needs to be bigger for it to contain the data that
         /// is currently being heard from the mixer.
         /// For example, playing a channel at 2x its normal speed would require the Buffer to be 2x the normal size (multiple = 2).
         /// Larger buffers obviously require more memory, so the multiplier should not be set higher than necessary.
-        /// The default multiplier is 2x. 
+        /// The default multiplier is 2x.
         /// Changes only affect subsequently setup channel buffers.
-        /// An existing channel can have its Buffer reinitilized by disabling and then re-enabling 
+        /// An existing channel can have its Buffer reinitilized by disabling and then re-enabling
         /// the <see cref="BassFlags.MixerBuffer"/> flag using <see cref="ChannelFlags"/>.
         /// </remarks>
         public static int MixerBufferLength
@@ -358,8 +361,8 @@ namespace ManagedBass.Mix
         /// </summary>
         /// <remarks>
         /// If a mixer is not a decoding channel (not using the BassFlag.Decode flag),
-        /// this config setting will just be a minimum and the mixer will 
-        /// always have a position record at least equal to its playback Buffer Length, 
+        /// this config setting will just be a minimum and the mixer will
+        /// always have a position record at least equal to its playback Buffer Length,
         /// as determined by the PlaybackBufferLength config option.
         /// The default setting is 2000ms.
         /// Changes only affect newly created mixers, not any that already exist.
@@ -380,7 +383,7 @@ namespace ManagedBass.Mix
         /// <param name="Flags">A combination of <see cref="BassFlags"/>.</param>
         /// <param name="Mask">
         /// The flags (as above) to modify.
-        /// Flags that are not included in this are left as they are, so it can be set to 0 (<see cref="BassFlags.Default" />) in order to just retrieve the current flags. 
+        /// Flags that are not included in this are left as they are, so it can be set to 0 (<see cref="BassFlags.Default" />) in order to just retrieve the current flags.
         /// To modify the speaker flags, any of the Speaker flags can be used in the mask (no need to include all of them).
         /// </param>
         /// <returns>If successful, the channel's updated flags are returned, else -1 is returned. Use <see cref="Bass.LastError" /> to get the error code.</returns>
@@ -420,7 +423,7 @@ namespace ManagedBass.Mix
         /// <param name="Buffer">Location to write the data as an <see cref="IntPtr" /> (can be <see cref="IntPtr.Zero" /> when handle is a recording channel (HRECORD), to discard the requested amount of data from the recording buffer).</param>
         /// <param name="Length">Number of bytes wanted, and/or <see cref="DataFlags"/>.</param>
         /// <returns>
-        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code. 
+        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
         /// <para>When requesting FFT data, the number of bytes read from the channel (to perform the FFT) is returned.</para>
         /// <para>When requesting sample data, the number of bytes written to buffer will be returned (not necessarily the same as the number of bytes read when using the <see cref="DataFlags.Float"/> flag).</para>
         /// <para>When using the <see cref="DataFlags.Available"/> flag, the number of bytes in the channel's buffer is returned.</para>
@@ -432,7 +435,7 @@ namespace ManagedBass.Mix
         /// </para>
         /// <para>
         /// If the mixer is a decoding channel, then the channel's most recent data will be returned.
-        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it. 
+        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it.
         /// The <see cref="MixerBufferLength"/> config option can be used to set the buffer size.
         /// </para>
         /// </remarks>
@@ -448,7 +451,7 @@ namespace ManagedBass.Mix
         /// <param name="Buffer">byte[] to write the data to.</param>
         /// <param name="Length">Number of bytes wanted, and/or <see cref="DataFlags"/>.</param>
         /// <returns>
-        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code. 
+        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
         /// <para>When requesting FFT data, the number of bytes read from the channel (to perform the FFT) is returned.</para>
         /// <para>When requesting sample data, the number of bytes written to buffer will be returned (not necessarily the same as the number of bytes read when using the <see cref="DataFlags.Float"/> flag).</para>
         /// <para>When using the <see cref="DataFlags.Available"/> flag, the number of bytes in the channel's buffer is returned.</para>
@@ -460,7 +463,7 @@ namespace ManagedBass.Mix
         /// </para>
         /// <para>
         /// If the mixer is a decoding channel, then the channel's most recent data will be returned.
-        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it. 
+        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it.
         /// The <see cref="MixerBufferLength"/> config option can be used to set the buffer size.
         /// </para>
         /// </remarks>
@@ -476,7 +479,7 @@ namespace ManagedBass.Mix
         /// <param name="Buffer">short[] to write the data to.</param>
         /// <param name="Length">Number of bytes wanted, and/or <see cref="DataFlags"/>.</param>
         /// <returns>
-        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code. 
+        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
         /// <para>When requesting FFT data, the number of bytes read from the channel (to perform the FFT) is returned.</para>
         /// <para>When requesting sample data, the number of bytes written to buffer will be returned (not necessarily the same as the number of bytes read when using the <see cref="DataFlags.Float"/> flag).</para>
         /// <para>When using the <see cref="DataFlags.Available"/> flag, the number of bytes in the channel's buffer is returned.</para>
@@ -488,7 +491,7 @@ namespace ManagedBass.Mix
         /// </para>
         /// <para>
         /// If the mixer is a decoding channel, then the channel's most recent data will be returned.
-        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it. 
+        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it.
         /// The <see cref="MixerBufferLength"/> config option can be used to set the buffer size.
         /// </para>
         /// </remarks>
@@ -504,7 +507,7 @@ namespace ManagedBass.Mix
         /// <param name="Buffer">int[] to write the data to.</param>
         /// <param name="Length">Number of bytes wanted, and/or <see cref="DataFlags"/>.</param>
         /// <returns>
-        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code. 
+        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
         /// <para>When requesting FFT data, the number of bytes read from the channel (to perform the FFT) is returned.</para>
         /// <para>When requesting sample data, the number of bytes written to buffer will be returned (not necessarily the same as the number of bytes read when using the <see cref="DataFlags.Float"/> flag).</para>
         /// <para>When using the <see cref="DataFlags.Available"/> flag, the number of bytes in the channel's buffer is returned.</para>
@@ -516,7 +519,7 @@ namespace ManagedBass.Mix
         /// </para>
         /// <para>
         /// If the mixer is a decoding channel, then the channel's most recent data will be returned.
-        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it. 
+        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it.
         /// The <see cref="MixerBufferLength"/> config option can be used to set the buffer size.
         /// </para>
         /// </remarks>
@@ -532,7 +535,7 @@ namespace ManagedBass.Mix
         /// <param name="Buffer">float[] to write the data to.</param>
         /// <param name="Length">Number of bytes wanted, and/or <see cref="DataFlags"/>.</param>
         /// <returns>
-        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code. 
+        /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
         /// <para>When requesting FFT data, the number of bytes read from the channel (to perform the FFT) is returned.</para>
         /// <para>When requesting sample data, the number of bytes written to buffer will be returned (not necessarily the same as the number of bytes read when using the <see cref="DataFlags.Float"/> flag).</para>
         /// <para>When using the <see cref="DataFlags.Available"/> flag, the number of bytes in the channel's buffer is returned.</para>
@@ -544,7 +547,7 @@ namespace ManagedBass.Mix
         /// </para>
         /// <para>
         /// If the mixer is a decoding channel, then the channel's most recent data will be returned.
-        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it. 
+        /// Otherwise, the data will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it.
         /// The <see cref="MixerBufferLength"/> config option can be used to set the buffer size.
         /// </para>
         /// </remarks>
@@ -562,18 +565,18 @@ namespace ManagedBass.Mix
         /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
         /// <para>
         /// If successful, the level of the left channel is returned in the low word (low 16-bits), and the level of the right channel is returned in the high word (high 16-bits).
-        /// If the channel is mono, then the low word is duplicated in the high word. 
+        /// If the channel is mono, then the low word is duplicated in the high word.
         /// The level ranges linearly from 0 (silent) to 32768 (max). 0 will be returned when a channel is stalled.
         /// </para>
         /// </returns>
         /// <remarks>
         /// <para>
-        /// This function is like the standard <see cref="Bass.ChannelGetLevel(int)" />, but it gets the level from the channel's buffer instead of decoding data from the channel, which means that the mixer doesn't miss out on any data. 
+        /// This function is like the standard <see cref="Bass.ChannelGetLevel(int)" />, but it gets the level from the channel's buffer instead of decoding data from the channel, which means that the mixer doesn't miss out on any data.
         /// In order to do this, the source channel must have buffering enabled, via the <see cref="BassFlags.MixerBuffer"/> flag.
         /// </para>
         /// <para>
         /// If the mixer is a decoding channel, then the channel's most recent data will be used to get the level.
-        /// Otherwise, the level will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it. 
+        /// Otherwise, the level will be in sync with what is currently being heard from the mixer, unless the buffer is too small so that the currently heard data isn't in it.
         /// The <see cref="MixerBufferLength"/> config option can be used to set the buffer size.
         /// </para>
         /// </remarks>
@@ -594,13 +597,13 @@ namespace ManagedBass.Mix
         /// If an error occurs, -1 is returned, use <see cref="Bass.LastError" /> to get the error code.
 		/// <para>
         /// If successful, the level of the left channel is returned in the low word (low 16-bits), and the level of the right channel is returned in the high word (high 16-bits).
-        /// If the channel is mono, then the low word is duplicated in the high word. 
+        /// If the channel is mono, then the low word is duplicated in the high word.
 		/// The level ranges linearly from 0 (silent) to 32768 (max). 0 will be returned when a channel is stalled.
         /// </para>
 		/// </returns>
         /// <remarks>
 		/// <para>
-        /// This function is like the standard <see cref="Bass.ChannelGetLevel(int,float[],float,LevelRetrievalFlags)" />, but it gets the level from the channel's buffer instead of decoding data from the channel, which means that the mixer doesn't miss out on any data. 
+        /// This function is like the standard <see cref="Bass.ChannelGetLevel(int,float[],float,LevelRetrievalFlags)" />, but it gets the level from the channel's buffer instead of decoding data from the channel, which means that the mixer doesn't miss out on any data.
 		/// In order to do this, the source channel must have buffering enabled, via the <see cref="BassFlags.MixerBuffer"/> flag.
         /// </para>
         /// </remarks>
@@ -649,7 +652,7 @@ namespace ManagedBass.Mix
         /// Or you may just want to rearrange the channels. Matrix mixing allows all of these.
         /// </para>
         /// <para>
-        /// A matrix mixer is created on a per-source basis (you can mix'n'match normal and matrix mixing), by using the <see cref="BassFlags.MixerMatrix" /> and/or <see cref="BassFlags.MixerDownMix" /> flag when calling <see cref="MixerAddChannel(int,int,BassFlags)" /> or <see cref="MixerAddChannel(int,int,BassFlags,long,long)" />. 
+        /// A matrix mixer is created on a per-source basis (you can mix'n'match normal and matrix mixing), by using the <see cref="BassFlags.MixerMatrix" /> and/or <see cref="BassFlags.MixerDownMix" /> flag when calling <see cref="MixerAddChannel(int,int,BassFlags)" /> or <see cref="MixerAddChannel(int,int,BassFlags,long,long)" />.
         /// The matrix itself is a 2-dimensional array of floating-point mixing levels, with the source channels on one axis, and the output channels on the other.
         /// </para>
         /// </remarks>
@@ -685,7 +688,7 @@ namespace ManagedBass.Mix
         /// This function is like the standard <see cref="Bass.ChannelGetPosition" />, but it compensates for the mixer's buffering to return the source channel position that is currently being heard.
         /// So when used with a decoding channel (eg. a mixer source channel), this method will return the current decoding position.
         /// But if the mixer output is being played, then there is a playback buffer involved.
-        /// This function compensates for that, to return the position that is currently being heard. 
+        /// This function compensates for that, to return the position that is currently being heard.
         /// If the mixer itself is a decoding channel, then this function is identical to using <see cref="Bass.ChannelGetPosition" />.
         /// </remarks>
         /// <exception cref="Errors.Handle"><paramref name="Handle" /> is not plugged into a mixer.</exception>
@@ -748,19 +751,19 @@ namespace ManagedBass.Mix
         /// <returns>If succesful, then the new synchronizer's handle is returned, else 0 is returned. Use <see cref="Bass.LastError" /> to get the error code.</returns>
         /// <remarks>
         /// <para>
-        /// When used on a decoding channel (eg. a mixer source channel), syncs set with <see cref="Bass.ChannelSetSync" /> are automatically <see cref="SyncFlags.Mixtime"/>, 
-        /// which means that they will be triggered as soon as the sync event is encountered during decoding. 
-        /// But if the mixer output is being played, then there is a playback buffer involved, which will delay the hearing of the sync event. 
-        /// This function compensates for that, delaying the triggering of the sync until the event is actually heard. 
+        /// When used on a decoding channel (eg. a mixer source channel), syncs set with <see cref="Bass.ChannelSetSync" /> are automatically <see cref="SyncFlags.Mixtime"/>,
+        /// which means that they will be triggered as soon as the sync event is encountered during decoding.
+        /// But if the mixer output is being played, then there is a playback buffer involved, which will delay the hearing of the sync event.
+        /// This function compensates for that, delaying the triggering of the sync until the event is actually heard.
         /// If the mixer itself is a decoding channel, or the <see cref="SyncFlags.Mixtime"/> flag is used, then there is effectively no real difference between this function and <see cref="Bass.ChannelSetSync" />.
         /// One sync type that is slightly different is the <see cref="SyncFlags.Stalled"/> sync, which can be either mixtime or not.
         /// </para>
         /// <para>
-        /// Sync types that would automatically be mixtime when using <see cref="Bass.ChannelSetSync" /> are not so when using this function. 
+        /// Sync types that would automatically be mixtime when using <see cref="Bass.ChannelSetSync" /> are not so when using this function.
         /// The <see cref="SyncFlags.Mixtime"/> flag should be specified in those cases, or <see cref="Bass.ChannelSetSync" /> used instead.
         /// </para>
         /// <para>
-        /// When a source is removed from a mixer, any syncs that have been set on it via this function are automatically removed. 
+        /// When a source is removed from a mixer, any syncs that have been set on it via this function are automatically removed.
         /// If the channel is subsequently plugged back into a mixer, the previous syncs will not still be set on it.
         /// Syncs set via <see cref="Bass.ChannelSetSync" /> are unaffected.
         /// </para>
@@ -802,25 +805,25 @@ namespace ManagedBass.Mix
         /// <para>
         /// The main difference between this method and <see cref="ChannelSetSync(int,SyncFlags,long,SyncProcedure,IntPtr)" /> is, that this method invokes the <see cref="SyncProcedureEx" /> callback.
 		/// This callback contains an extra 'Offset' parameter, which defines the position of the sync occurrence within the current update cycle of the source converted to the mixer stream position.
-		/// This offset might be used to calculate more accurate non-mixtime sync triggers (as with non-mixtime sync's a variable delay is to be expected, as the accuracy depends on the sync thread waking in time, and there is no guarantee when that will happen) - 
+		/// This offset might be used to calculate more accurate non-mixtime sync triggers (as with non-mixtime sync's a variable delay is to be expected, as the accuracy depends on the sync thread waking in time, and there is no guarantee when that will happen) -
 		/// as well as mixtime syncs are only accurate to the current update period, as they are triggered within such.
 		/// So a mixtime sync is being triggered ahead of the actual mixer position being heard.
 		/// The 'Offset' parameter might be used to compensate for that.
 		/// </para>
 		/// <para>
-        /// When used on a decoding channel (eg. a mixer source channel), syncs set with <see cref="Bass.ChannelSetSync" /> are automatically <see cref="SyncFlags.Mixtime"/>, 
-        /// which means that they will be triggered as soon as the sync event is encountered during decoding. 
-        /// But if the mixer output is being played, then there is a playback buffer involved, which will delay the hearing of the sync event. 
-        /// This function compensates for that, delaying the triggering of the sync until the event is actually heard. 
+        /// When used on a decoding channel (eg. a mixer source channel), syncs set with <see cref="Bass.ChannelSetSync" /> are automatically <see cref="SyncFlags.Mixtime"/>,
+        /// which means that they will be triggered as soon as the sync event is encountered during decoding.
+        /// But if the mixer output is being played, then there is a playback buffer involved, which will delay the hearing of the sync event.
+        /// This function compensates for that, delaying the triggering of the sync until the event is actually heard.
         /// If the mixer itself is a decoding channel, or the <see cref="SyncFlags.Mixtime"/> flag is used, then there is effectively no real difference between this function and <see cref="Bass.ChannelSetSync" />.
         /// One sync type that is slightly different is the <see cref="SyncFlags.Stalled"/> sync, which can be either mixtime or not.
         /// </para>
         /// <para>
-        /// Sync types that would automatically be mixtime when using <see cref="Bass.ChannelSetSync" /> are not so when using this function. 
+        /// Sync types that would automatically be mixtime when using <see cref="Bass.ChannelSetSync" /> are not so when using this function.
         /// The <see cref="SyncFlags.Mixtime"/> flag should be specified in those cases, or <see cref="Bass.ChannelSetSync" /> used instead.
         /// </para>
         /// <para>
-        /// When a source is removed from a mixer, any syncs that have been set on it via this function are automatically removed. 
+        /// When a source is removed from a mixer, any syncs that have been set on it via this function are automatically removed.
         /// If the channel is subsequently plugged back into a mixer, the previous syncs will not still be set on it.
         /// Syncs set via <see cref="Bass.ChannelSetSync" /> are unaffected.
         /// </para>
@@ -856,7 +859,7 @@ namespace ManagedBass.Mix
         /// <param name="Sync">Handle of the synchronizer to remove (return value of a previous <see cref="ChannelSetSync(int, SyncFlags, long, SyncProcedure, IntPtr)" /> call).</param>
         /// <returns>If succesful, <see langword="true" /> is returned, else <see langword="false" /> is returned. Use <see cref="Bass.LastError" /> to get the error code.</returns>
         /// <remarks>This function can only remove syncs that were set via <see cref="ChannelSetSync(int, SyncFlags, long, SyncProcedure, IntPtr)" />, not those that were set via <see cref="Bass.ChannelSetSync(int, SyncFlags, long, SyncProcedure, IntPtr)" />.</remarks>
-        /// <exception cref="Errors.Handle">At least one of <paramref name="Handle" /> and <paramref name="Sync" /> is not valid.</exception>        
+        /// <exception cref="Errors.Handle">At least one of <paramref name="Handle" /> and <paramref name="Sync" /> is not valid.</exception>
         public static bool ChannelRemoveSync(int Handle, int Sync)
         {
             var b = BASS_Mixer_ChannelRemoveSync(Handle, Sync);
@@ -915,13 +918,13 @@ namespace ManagedBass.Mix
         /// <returns>If successful, <see langword="true" /> is returned, else <see langword="false" /> is returned. Use <see cref="Bass.LastError" /> to get the error code.</returns>
         /// <remarks>
         /// <para>
-        /// Envelopes are applied on top of the channel's attributes, as set via <see cref="Bass.ChannelSetAttribute(int,ChannelAttribute,float)" />. 
-        /// In the case of <see cref="MixEnvelope.Frequency"/> and <see cref="MixEnvelope.Volume"/>, 
-        /// the final sample rate and volume is a product of the channel attribute and the envelope. 
+        /// Envelopes are applied on top of the channel's attributes, as set via <see cref="Bass.ChannelSetAttribute(int,ChannelAttribute,float)" />.
+        /// In the case of <see cref="MixEnvelope.Frequency"/> and <see cref="MixEnvelope.Volume"/>,
+        /// the final sample rate and volume is a product of the channel attribute and the envelope.
         /// While in the <see cref="MixEnvelope.Pan"/> case, the final panning is a sum of the channel attribute and envelope.
         /// </para>
         /// <para>
-        /// <see cref="ChannelGetEnvelopePosition" /> can be used to get the current envelope position, 
+        /// <see cref="ChannelGetEnvelopePosition" /> can be used to get the current envelope position,
         /// and a <see cref="SyncFlags.MixerEnvelope"/> sync can be set via <see cref="ChannelSetSync(int,SyncFlags,long,SyncProcedure,IntPtr)" /> to be informed of when an envelope ends.
         /// The function can be called again from such a sync, in order to set a new envelope to follow the old one.
         /// </para>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !__IOS__
+using System;
 using System.Runtime.InteropServices;
 
 namespace ManagedBass
@@ -278,3 +279,4 @@ namespace ManagedBass
         #endregion
     }
 }
+#endif

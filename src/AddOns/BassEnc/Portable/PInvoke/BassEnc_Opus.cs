@@ -13,7 +13,7 @@ namespace ManagedBass.Enc
 #else
         const string DllName = "bassenc_opus";
 #endif
-                
+
         [DllImport(DllName)]
         static extern int BASS_Encode_OPUS_GetVersion();
 
@@ -39,8 +39,8 @@ namespace ManagedBass.Enc
         /// <param name="User">User instance data to pass to the callback function.</param>
         /// <returns>The encoder handle is returned if the encoder is successfully started, else 0 is returned. Use <see cref="Bass.LastError"/> to get the error code</returns>
         /// <remarks>
-        /// <see cref="BassEnc.EncodeStart(int,string,EncodeFlags,EncoderProcedure,IntPtr)"/> is used internally to apply the encoder to the source channel, so the remarks in its documentation also apply to this function. 
-        /// 
+        /// <see cref="BassEnc.EncodeStart(int,string,EncodeFlags,EncoderProcedure,IntPtr)"/> is used internally to apply the encoder to the source channel, so the remarks in its documentation also apply to this function.
+        ///
         /// <b>Platform-specific</b>
         /// On Windows and Linux, an SSE supporting CPU is required for sample rates other than 48000/24000/16000/12000/8000 Hz.
         /// </remarks>
@@ -68,8 +68,8 @@ namespace ManagedBass.Enc
         /// <param name="FileName">Output filename... null = no output file.</param>
         /// <returns>The encoder handle is returned if the encoder is successfully started, else 0 is returned. Use <see cref="Bass.LastError"/> to get the error code</returns>
         /// <remarks>
-        /// <see cref="BassEnc.EncodeStart(int,string,EncodeFlags,EncoderProcedure,IntPtr)"/> is used internally to apply the encoder to the source channel, so the remarks in its documentation also apply to this function. 
-        /// 
+        /// <see cref="BassEnc.EncodeStart(int,string,EncodeFlags,EncoderProcedure,IntPtr)"/> is used internally to apply the encoder to the source channel, so the remarks in its documentation also apply to this function.
+        ///
         /// <b>Platform-specific</b>
         /// On Windows and Linux, an SSE supporting CPU is required for sample rates other than 48000/24000/16000/12000/8000 Hz.
         /// </remarks>

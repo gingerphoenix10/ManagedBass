@@ -21,12 +21,12 @@ namespace ManagedBass
     /// </remarks>
     public static partial class Bass
     {
-#if __STATIC_LINKING__
+#if __STATIC_LINKING__ || __IOS__
         const string DllName = "__Internal";
 #else
         const string DllName = "bass";
 #endif
-        
+
         /// <summary>
         /// Gets the Formats supported by Bass separated by `;`. The list is not necessarily complete.
         /// </summary>
