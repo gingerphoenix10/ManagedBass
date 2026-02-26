@@ -11,7 +11,7 @@ namespace ManagedBass.Enc
     /// </summary>
     public static class BassEnc_Acc
     {
-#if __STATIC_LINKING__
+#if __STATIC_LINKING__ || __INTERNAL__
         const string DllName = "__Internal";
 #else
     const string DllName = "bassenc_aac";
